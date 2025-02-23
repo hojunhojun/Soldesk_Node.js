@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Dec02</title>
+        <link
+            rel="stylesheet"
+            href="https://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css"
+        />
+        <script src="http://IP주소:포트번호/socket.io/socket.io.js"></script>
+        <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+        <script src="https://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
+        <script>
+            $(function () {
+                var socket = io.connect("http://IP주소:포트번호");
+                var name;
+                $("#msg").keyup(function(e) {
+                    if (e.keyCode == 13) {
+                        name = $("#name").val();
+                        var txt = $(this).val();
+                        var msg = {n : name, t : txt};
+                        socket.emit("myTxt", msg);
+                        $(this).val("");
+                    }
+                });
+
+                socket.on("serverTxt", function(msg) {
+                    var br = $("<br>");
+                    var td = $("<td></td>").append(msg.n, br , msg.t);
+                    var tr = $("<tr></tr>").append(td);
+                    var table = $("<table></table>").append(tr);
+                    var td2 = $("<td></td>").append(table);
+                    var tr2 = $("<tr></tr>").append(td2);
+                    var table2 = $("<table></table>").attr("class", "table2").append(tr2);
+                    if (name == msg.n) {
+                        table = table.attr("class", "myTxt");
+                        td2 = td2.attr("align", "right");
+                    } else {
+                        table = table.attr("class", "yourTxt");
+                    }
+                    $("#chatArea").append(table2);
+                    $(window).scrollTop($(document).height());
+                });
+            });
+        </script>
+        <style>
+            .table2{
+                width: 100%;
+            }
+            .myTxt{
+            border: white solid 3px;  background-color: blue;   color:white;   padding: 7px;
+            }
+            .yourTxt{
+            border: blue solid 3px;   background-color: white;  color: blue;   padding: 7px;
+            }
+        </style>
+    </head>
+    <body>
+        <div data-role="page" id="loginPage">
+            <div data-role="header" data-position="fixed">
+                <h1>솔데스크대화방</h1>
+            </div>
+            <div data-role="content">
+                대화명<input id="name" />
+                <a href="#chatPage" data-role="button" data-theme="e">입장</a>
+            </div>
+        </div>
+        <div data-role="page" id="chatPage">
+            <div data-role="header" data-position="fixed">
+                <a href="#loginPage" data-transition="turn">처음으로</a>
+                <h1>솔데스크대화방</h1>
+            </div>
+            <div data-role="content" id="chatArea">
+                
+            </div>
+            <div data-role="footer" data-theme="a" data-position="fixed">
+                <input placeholder="대화 내용 입력" id="msg">
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<style type="text/css">
+canvas {
+	border: black solid 3px;
+}
+</style>
+<script src="http://IP주소:포트번호/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="jQuery.js"></script>
+<script type="text/javascript">
+	$(function() {
+        var socket = io.connect("http://IP주소:포트번호");
+        $("#paper").click(function() {
+            socket.emit("myTxt", "start");
+        });
+		var paper = document.getElementById("paper");
+		var pen = paper.getContext("2d");
+		
+		var ball = new Image();
+		ball.src = "ball.png";
+		
+		var ballX=135;
+		var ballY=185;
+		var xSpeed=0;
+		var ySpeed=-0;
+		var paperOffsetX = $("#paper").offset().left;
+	    var barX = 100;
+        var barX2 = 100;
+		ball.onload = function() {
+			pen.drawImage(ball, 0, 0);
+			var timer = setInterval(function() {
+				pen.save();
+				
+				pen.fillStyle = "rgb(0, 0, 0, 0.1)";
+				pen.fillRect(0,0,300,400);
+				
+				pen.shadowOffsetX = 0;
+				pen.shadowOffsetY = 0;
+				pen.shadowBlur = 10;
+				pen.shadowColor = "white";
+
+				if (ballX >= 270 || ballX <= 0) {
+					xSpeed *= -1;
+				}
+				if (ballY <= 0) {
+					alert("승리");
+					clearInterval(timer);
+				}
+				if (ballY >= 370) {
+                    alert("패배");
+					clearInterval(timer);
+				}
+				// && 확률 낮은거 앞으로
+				// || 확률 높은거 앞으로
+				if (ballY >=355 && ballX >= barX-15 & ballX <= barX + 85) {
+					ySpeed *=-1;
+				}
+                if (ballY <=15 && ballX >= barX-15 & ballX <= barX + 85) {
+					ySpeed *=-1;
+				}
+				ballX += xSpeed;
+				ballY += ySpeed;
+				pen.drawImage(ball, ballX, ballY);
+				
+				pen.shadowColor = "red";
+				pen.fillStyle = "green";
+				pen.fillRect(barX, 385, 100, 15); // 내꺼
+
+                pen.fillStyle = "white";
+                pen.fillRect(barX2, 0, 100, 15); // 상대꺼
+				
+				pen.restore();
+			}, 5);
+		}
+		
+		$("#paper").mousemove(function(e) {
+			barX = e.pageX - paperOffsetX - 50;
+            var data = {who : "host", x : 200 - barX};
+            socket.emit("myTxt", data);
+		});
+
+        socket.on("serverTxt", function(msg){
+            if(msg == "start") {
+                xSpeed = 2;
+                ySpeed = 2;
+            } else if (msg.who == "guest") {
+                barX2 = msg.x;
+            }
+        });
+	});
+</script>
+<body>
+	<canvas id="paper" width="300px" height="400px"></canvas>
+</body>
+</html>

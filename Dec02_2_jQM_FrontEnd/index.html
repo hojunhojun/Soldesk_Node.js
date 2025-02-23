@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Dec02</title>
+        <link
+            rel="stylesheet"
+            href="https://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css"
+        />
+        <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+        <script src="https://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
+        <script>
+            function getSnack() {
+                $.getJSON(
+                    "http://IP주소:포트번호/snack.get",
+                    function (snackData) {
+                        $("ul").empty();
+                        $.each(snackData, function (i, s) {
+                            var li = $("<li></li>").text(
+                                s.s_name + " : " + s.s_price
+                            );
+                            $("ul").append(li);
+                        });
+                        $("ul").listview("refresh");
+                    }
+                );
+            }
+            $(function () {
+                getSnack();
+                $("button").click(function(){
+                    var n = $("#n").val();
+                    var p = $("#p").val();
+                    var url = "http://IP주소:포트번호/snack.reg?name=" +n+"&price="+p;
+
+                    $.getJSON(url, function(regResult) {
+                        alert("등록성공");
+                        getSnack();
+                    });
+                    $("#n").val("");
+                    $("#p").val("");
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div data-role="page">
+            <div data-role="header" data-position="fixed">
+                <h1>과자</h1>
+            </div>
+            <div data-role="content">
+                이름<input id="n" />
+                가격<input id="p" />
+                <button>등록</button>
+                <ul data-role="listview" data-inset="true"></ul>
+            </div>
+        </div>
+    </body>
+</html>
